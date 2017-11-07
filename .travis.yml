@@ -4,4 +4,7 @@ before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -y texlive texlive-xetex texlive-latex-extra latexmk
 script:
-    - make all
+    - xelatex -no-pdf thesis
+    - biber --debug thesis
+    - xelatex thesis
+    - xelatex thesis
