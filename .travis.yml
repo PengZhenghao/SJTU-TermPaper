@@ -3,8 +3,10 @@ cache:
     - apt
 install:
     - sudo apt-get update -qq
-    - sudo apt-get install -y texlive texlive-xetex texlive-latex-extra latexmk
-    - sudo tlmgr install ctex
+    - sudo apt-get install -y texlive texlive-xetex texlive-latex-extra latexmk xzdec
+    - tlmgr init-usertree
+    - tlmgr option repository ftp://tug.org/historic/systems/texlive/2013/tlnet-final 
+    - tlmgr install ctex
 script:
     - xelatex -no-pdf thesis
     - biber --debug thesis
