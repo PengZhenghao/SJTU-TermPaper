@@ -1,9 +1,10 @@
+sudo: required
 cache:
     - apt
 install:
     - sudo apt-get update -qq
     - sudo apt-get install -y texlive texlive-xetex texlive-latex-extra latexmk
-    - tlmgr install ctex
+    - sudo tlmgr install ctex
 script:
     - xelatex -no-pdf thesis
     - biber --debug thesis
