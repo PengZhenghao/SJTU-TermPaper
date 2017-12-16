@@ -6,11 +6,15 @@
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{sjtuthesis}[2017/02/19 v0.9.5 Shanghai Jiao Tong University Template]
 \def\version{v0.9.5}
+
+\newif\ifmultiauthorflag\multiauthorflagfalse
+\newif\ifsjtu@project\sjtu@projectfalse
 \newif\ifsjtu@bachelor\sjtu@bachelorfalse
 \newif\ifsjtu@master\sjtu@masterfalse
 \newif\ifsjtu@doctor\sjtu@doctorfalse
 \newif\ifsjtu@review\sjtu@reviewfalse
 \newif\ifsjtu@submit\sjtu@submitfalse
+\DeclareOption{project}{\sjtu@projecttrue}
 \DeclareOption{bachelor}{\sjtu@bachelortrue}
 \DeclareOption{master}{\sjtu@mastertrue}
 \DeclareOption{doctor}{\sjtu@doctortrue}
@@ -22,11 +26,14 @@
 \ifsjtu@bachelor\relax\else
   \ifsjtu@master\relax\else
     \ifsjtu@doctor\relax\else
+     \ifsjtu@project\relax\else
       \ClassError{sjtuthesis}%
-      		{You have to specify one of thesis options: bachelor, master or doctor.}{}
+      		{You have to specify one of thesis options: project, bachelor, master or doctor.}{}
+     \fi
     \fi
   \fi
 \fi
+
 
 %% sjtuthesis.cls segments
 % 0. Import sjtuthesis.cfg
@@ -55,6 +62,7 @@
 \RequirePackage{threeparttable}
 \RequirePackage{dcolumn}
 \RequirePackage{multirow}
+\RequirePackage{makecell}
 \RequirePackage{booktabs}
 \RequirePackage{mathtools,amsthm,amsfonts,amssymb,bm,mathrsfs} 
 \RequirePackage{upgreek}
@@ -83,6 +91,7 @@
 \RequirePackage{algorithm, algorithmicx, algpseudocode}
 \RequirePackage{siunitx}
 \RequirePackage{tikz}
+\RequirePackage{xparse}
 \usetikzlibrary{shapes.geometric, arrows}
 
 %==========
@@ -129,7 +138,7 @@
 %==========
 
 % Set the mainfont
-\setmainfont{TeX Gyre Termes}
+%\setmainfont{TeX Gyre Termes}
 
 %% 行距缩放因子
 \linespread{1.3}
@@ -321,12 +330,7 @@
 
 \renewcommand\maketitle[1]{%
   \pdfbookmark[0]{封~~~~面}{titlepage}
-  \ifsjtu@bachelor
-    \make@bachelor@cntitle \cleardoublepage
-  \else
-    \make@cntitle \cleardoublepage
-    \make@entitle \cleardoublepage
-  \fi
+  	\make@project@cntitle \cleardoublepage
 }
 
 \newcommand\classification[1]{\def\sjtu@value@classification{#1}}
@@ -337,7 +341,13 @@
 \renewcommand\title[2][\sjtu@value@title]{%
   \def\sjtu@value@title{#2}
   \def\sjtu@value@titlemark{\MakeUppercase{#1}}}
+  
 \renewcommand\author[1]{\def\sjtu@value@author{#1}}
+
+%\newcommand{\@multiauthor}{}
+%\newcommand{\multiauthor}[1]{\renewcommand{\@multiauthor}{#1}}
+
+
 \newcommand\advisor[1]{\def\sjtu@value@advisor{#1}}
 \newcommand\coadvisor[1]{\def\sjtu@value@coadvisor{#1}}
 \newcommand\major[1]{\def\sjtu@value@major{#1}}
@@ -346,88 +356,114 @@
 \newcommand\institute[1]{\def\sjtu@value@institute{#1}}
 \newcommand\chairman[1]{\def\sjtu@value@chairman{#1}}
 
-% “绘制”中文标题页
-\newcommand\make@cntitle[1]{%
-  \cleardoublepage
-  \thispagestyle{empty}
-  \begin{center}
-  {\songti\zihao{-3}\sjtu@label@statement}
-  \vskip\stretch{1}
-  {\heiti\zihao{3}\sjtu@value@title}
-  \vskip\stretch{1}
-  {\fangsong\zihao{4}}
-  \def\tabcolsep{1pt}
-  \def\arraystretch{1.5}
-  \begin{tabular}{rl}
-    \ifsjtu@review
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@author\end{CJKfilltwosides} & \underline{\makebox[150pt]{}}\\
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@studentnumber\end{CJKfilltwosides} & \underline{\makebox[150pt]{}} \\
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@advisor\end{CJKfilltwosides}  & \underline{\makebox[150pt]{}} \\ 
-      \ifx\sjtu@value@coadvisor\undefined\else
-        \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@coadvisor\end{CJKfilltwosides} & \underline{\makebox[150pt]{}} \\ 
-      \fi
-    \else
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@author\end{CJKfilltwosides}	& \underline{\makebox[150pt]{\sjtu@value@author}} \\
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@studentnumber\end{CJKfilltwosides} & \underline{\makebox[150pt]{\sjtu@value@studentnumber}} \\
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@advisor\end{CJKfilltwosides} 	 & \underline{\makebox[150pt]{\sjtu@value@advisor}} \\ 
-      \ifx\sjtu@value@coadvisor\undefined\else
-        \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@coadvisor\end{CJKfilltwosides} 	 & \underline{\makebox[150pt]{\sjtu@value@coadvisor}} \\ 
-      \fi
-    \fi
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@major\end{CJKfilltwosides} 	 & \underline{\makebox[150pt]{\sjtu@value@major}} \\
-      \begin{CJKfilltwosides}{4em}\heiti\sjtu@label@defenddate\end{CJKfilltwosides} 	 & \underline{\makebox[150pt]{\sjtu@value@defenddate}}
-  \end{tabular}
-  \end{center}
-  \vskip \stretch{0.5}
-  \cleardoublepage
+\newcommand\setmultiauthor{
+\multiauthorflagtrue}
+
+\newif\ifone@flag\one@flagfalse
+\newif\iftwo@flag\two@flagfalse
+\newif\ifthree@flag\three@flagfalse
+\newif\iffour@flag\four@flagfalse
+\newif\iffive@flag\five@flagfalse
+\newif\ifsix@flag\six@flagfalse
+\newif\ifseven@flag\seven@flagfalse
+\newif\ifeight@flag\eight@flagfalse
+\newif\ifnine@flag\nine@flagfalse
+\NewDocumentCommand \multiauthorone{gg}
+{
+\def\@one@name{#1}
+\def\@one@num{#2}
+\def\one@flagtrue{}
 }
 
-% English Title Page
-\newcommand\englishtitle[1]{\def\sjtu@value@englishtitle{#1}}
-\newcommand\englishauthor[1]{\def\sjtu@value@englishauthor{#1}}
-\newcommand\englishadvisor[1]{\def\sjtu@value@englishadvisor{#1}}
-\newcommand\englishcoadvisor[1]{\def\sjtu@value@englishcoadvisor{#1}}
-\newcommand\englishschool[1]{\def\sjtu@value@englishschool{#1}}
-\newcommand\englishinstitute[1]{\def\sjtu@value@englishinstitute{#1}}
-\newcommand\englishdate[1]{\def\sjtu@value@englishdate{#1}}
-\newcommand\englishdegree[1]{\def\sjtu@value@englishdegree{#1}}
-\newcommand\englishmajor[1]{\def\sjtu@value@englishmajor{#1}}
+\NewDocumentCommand \multiauthortwo{gg}
+{
+\def\@two@name{#1}
+\def\@two@num{#2}
+\two@flagtrue}
 
-% “绘制”英文标题页
-\newcommand\make@entitle[1]{%
-  \cleardoublepage
-  \thispagestyle{empty}
-  \begin{center}
-      {\normalfont\zihao{4} \sjtu@label@englishstatement} 
-      \vspace{20pt} \vskip\stretch{1}
-      {\huge\sjtu@value@englishtitle \vskip 1pt}
-      \vskip \stretch{1}
-    \ifsjtu@review
-      \vskip \stretch{1}
-      \vskip 3pt
-      \vskip \stretch{2}
-    \else
-      {\normalfont\zihao{4}\sjtu@value@englishauthor} 
-      \vskip \stretch{1}
-      {\normalfont\zihao{4}\sjtu@label@englishadvisor} 
-      \vskip 2pt
-      {\normalfont\zihao{4}\sjtu@value@englishadvisor} 
-      \vskip 5pt
-      \ifx\sjtu@value@englishcoadvisor\undefined\else
-        {\normalfont\zihao{4}\sjtu@label@englishcoadvisor} 
-        \vskip 2pt
-        {\normalfont\zihao{4}\sjtu@value@englishcoadvisor} 
-        \vskip \stretch{2}
-      \fi
-    \fi 
-    \normalfont\sjtu@value@englishinstitute \vskip 30pt
-    \normalfont\sjtu@value@englishdate \vskip 20pt
-  \end{center}
-  \cleardoublepage
+\NewDocumentCommand \multiauthorthree{gg}
+{
+\def\@three@name{#1}
+\def\@three@num{#2}
+\three@flagtrue}
+
+\NewDocumentCommand \multiauthorfour{gg}
+{
+\def\@four@name{#1}
+\def\@four@num{#2}
+\four@flagtrue}
+
+\NewDocumentCommand \multiauthorfive{gg}
+{
+\def\@five@name{#1}
+\def\@five@num{#2}
+\five@flagtrue}
+
+\NewDocumentCommand \multiauthorsix{gg}
+{
+\def\@six@name{#1}
+\def\@six@num{#2}
+\six@flagtrue}
+
+\NewDocumentCommand \multiauthorseven{gg}
+{
+\def\@seven@name{#1}
+\def\@seven@num{#2}
+\seven@flagtrue}
+
+\NewDocumentCommand \multiauthoreight{gg}
+{
+\def\@eight@name{#1}
+\def\@eight@num{#2}
+\eight@flagtrue}
+
+\NewDocumentCommand \multiauthornine{gg}
+{
+\def\@nine@name{#1}
+\def\@nine@num{#2}
+\nine@flagtrue}
+
+
+
+\newcommand \foo[2]{
+\makebox[180pt]{ #1{}}&\makebox[180pt]{#2{}}\\
+\Xhline{0.75pt}
 }
 
-% “绘制”学士论文标题页
-\newcommand\make@bachelor@cntitle[1]{%
+\newcommand\parse
+{
+\ifone@flag
+\foo{\@one@name}{\@one@num}
+\fi
+\iftwo@flag
+\foo{\@two@name}{\@two@num}
+\fi
+\ifthree@flag
+\foo{\@three@name}{\@three@num}
+\fi
+\iffour@flag
+\foo{\@four@name}{\@four@num}
+\fi
+\iffive@flag
+\foo{\@five@name}{\@five@num}
+\fi
+\ifsix@flag
+\foo{\@six@name}{\@six@num}
+\fi
+\ifseven@flag
+\foo{\@seven@name}{\@seven@num}
+\fi
+\ifeight@flag
+\foo{\@eight@name}{\@eight@num}
+\fi
+\ifnine@flag
+\foo{\@nine@name}{\@nine@num}
+\fi
+}
+
+
+% 绘制project封面页
+\newcommand\make@project@cntitle[1]{%
   \cleardoublepage
   \newgeometry{body={16cm,24cm}}
   \thispagestyle{empty}
@@ -438,13 +474,10 @@
       \includegraphics{sjtulogo}
     \end{figure}
     \vskip 15pt
-    {\kaishu\setfontsize{32bp}\sjtu@value@chinesedegree\sjtu@label@thesis}
-    \vskip 15pt
-    {\zihao{-2}\MakeUppercase{Thesis of \sjtu@value@englishdegree}}
     \vskip 3pt
     \begin{figure}[!h]
      \centering
-     \includegraphics[width=3cm]{sjtubadge}
+     \includegraphics[width=6cm]{sjtubadge}
     \end{figure}
     \vskip \stretch{2}
     {\kaishu\zihao{2}
@@ -455,64 +488,35 @@
     \vskip \stretch{1}
     {\kaishu\zihao{3}
     \def\arraystretch{1.1}
+\ifmultiauthorflag %多作者
+      \begin{tabular}{r@{}l}    
+      \parse
+      \end{tabular}
+\else %单作者
     \begin{tabular}{r@{：}l}
-      \ifsjtu@review
-        \begin{CJKfilltwosides}{4em}\sjtu@label@author\end{CJKfilltwosides} & \underline{\makebox[180pt]{}}\\
-        \begin{CJKfilltwosides}{4em}\sjtu@label@studentnumber\end{CJKfilltwosides} & \underline{\makebox[180pt]{}} \\
-      \else
-        \begin{CJKfilltwosides}{4em}\sjtu@label@author\end{CJKfilltwosides}	& \underline{\makebox[180pt]{\sjtu@value@author}} \\
+
+        \begin{CJKfilltwosides}{4em}\sjtu@label@author\end{CJKfilltwosides}	& \underline{\makebox[180pt]{dsfdsfsdf\sjtu@value@author}} \\
         \begin{CJKfilltwosides}{4em}\sjtu@label@studentnumber\end{CJKfilltwosides} & \underline{\makebox[180pt]{\sjtu@value@studentnumber}} \\
-      \fi
+
       \begin{CJKfilltwosides}{4em}\sjtu@label@major\end{CJKfilltwosides} 	 & \underline{\makebox[180pt]{\sjtu@value@major}} \\
-      \ifsjtu@review
-        \begin{CJKfilltwosides}{4em}\sjtu@label@advisor\end{CJKfilltwosides}  & \underline{\makebox[180pt]{}} \\
-      \else
+
         \begin{CJKfilltwosides}{4em}\sjtu@label@advisor\end{CJKfilltwosides} 	 & \underline{\makebox[180pt]{\sjtu@value@advisor}} \\
-      \fi
+
       \begin{CJKfilltwosides}{4em}\sjtu@label@institute\end{CJKfilltwosides} 	 & \underline{\makebox[180pt]{\sjtu@value@institute}}
-  \end{tabular}}
+       
+  \end{tabular}
+       \fi
+       }
+      % 单作者end
+      
   \end{center}
   \restoregeometry
   \cleardoublepage
 }
 
-% 原创性声明
-\newcommand\makeDeclareOriginal{%
-  \cleardoublepage
-  \thispagestyle{empty}
-  \begin{center}
-  	{\bf\zihao{3} \sjtu@value@school}\\
-  	{\bf\zihao{3} \sjtu@label@original}
-  \end{center}
-  \vskip 10pt
-  {\par\zihao{-4}\sjtu@label@originalcontent\par}
-  \vskip 60pt
-  \hspace{13em}\sjtu@label@authorsign\hrulefill\hspace{1.5em}
-  \vskip 15pt
-  \hspace{16em}\sjtu@label@originalDate\hspace{1em}
-  \cleardoublepage
-}
-
-
-% 授权声明
-\newcommand\makeDeclareAuthorization{%
-  \cleardoublepage
-  \thispagestyle{empty}
-  \begin{center}
-  	{\bf\zihao{3} \sjtu@value@school}\\
-  	{\bf\zihao{3} \sjtu@label@authorization}
-  \end{center}
-  \vskip 10pt
-  {\par\zihao{-4}\sjtu@label@authorizationcontent\par}
-  \vskip 60pt
-  \sjtu@label@authorsign\hrulefill\hspace{3em}\sjtu@label@Supervisorsign\hrulefill
-  \vskip 15pt
-  \sjtu@label@originalDate\hfill\hspace{3em}\sjtu@label@originalDate
-  \cleardoublepage
-}
 
 % fancyhdr页眉页脚设置
-\ifsjtu@bachelor
+\ifsjtu@project
 	% 本科学位论文页眉页脚设置
 	%% 正文页眉页脚
 	\fancypagestyle{main}{
@@ -538,43 +542,6 @@
 	  \fancyfoot[C]{\small 第~{\bf\thepage}~页\,共~{\bf\pageref{last}}~页}
 	  \renewcommand{\headheight}{32pt}
 	}
-\else
-	% 研究生学位论文页眉页脚设置
-	\if@twoside
-	  %% 正文页眉页脚
-	  \fancypagestyle{main}{
-	    \fancyhead[LO, RE]{\small\kaishu\sjtu@value@school\sjtu@value@chinesedegree\sjtu@label@thesis}
-	    \fancyhead[RO]{\nouppercase{\small\kaishu\leftmark}}
-	    \fancyhead[LE]{\nouppercase{\small\kaishu\sjtu@value@titlemark}}
-	    \fancyfoot[C]{\small ---~{\bfseries\thepage}~---}
-	    \renewcommand{\headheight}{32pt}
-	  }
-	  %% 开章页页眉页脚
-	  \fancypagestyle{plain}{
-	    \fancyhf{}
-	    \fancyhead[LO,RE]{\nouppercase{\small\kaishu\sjtu@value@school\sjtu@value@chinesedegree\sjtu@label@thesis}}
-	    \fancyhead[RO]{\nouppercase{\small\kaishu\leftmark}}
-	    \fancyhead[LE]{\nouppercase{\small\kaishu\sjtu@value@titlemark}}
-	    \fancyfoot[C]{\small ---~{\bf\thepage}~---}
-	    \renewcommand{\headheight}{32pt}
-	  }
-	\else
-	%% 正文页
-	\fancypagestyle{main}{
-	  \fancyhead[L]{\small\kaishu\sjtu@value@school\sjtu@value@chinesedegree\sjtu@label@thesis}
-	  \fancyhead[R]{\nouppercase{\small\kaishu\leftmark}}
-	  \fancyfoot[C]{\small ---~{\bf\thepage}~---}
-	  \renewcommand{\headheight}{32pt}
-	}
-	\fancypagestyle{plain}{
-	  \fancyhf{}
-	  \fancyhead[L]{\nouppercase{\small\kaishu\sjtu@value@school\sjtu@value@chinesedegree\sjtu@label@thesis}}
-	  \fancyhead[R]{\nouppercase{\small\kaishu\leftmark}}
-	  % \fancyhead[L]{\small {\it\sjtu@value@titlemark}}
-	  \fancyfoot[C]{\small ---~{\bf\thepage}~---}
-	  \renewcommand{\headheight}{32pt}
-	}
-	\fi
 \fi
 
 % 中英文摘要
@@ -595,96 +562,20 @@
 
 \addtocontents{toc}{\let\string\CTEX@spaceChar\relax}
 
-\newenvironment{publications}[1]
-     {\chapter{\sjtu@label@publications}%
-      \@mkboth{\MakeUppercase\sjtu@label@publications}
-              {\MakeUppercase\sjtu@label@publications}%
-      \list{\@biblabel{\@arabic\c@enumiv}}%
-           {\settowidth\labelwidth{\@biblabel{#1}}%
-            \leftmargin\labelwidth
-            \advance\leftmargin\labelsep
-            \@openbib@code
-            \usecounter{enumiv}%
-            \let\p@enumiv\@empty
-            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
-      \sloppy
-      \clubpenalty4000
-      \@clubpenalty \clubpenalty
-      \widowpenalty4000%
-      \sfcode`\.\@m}
-     {\def\@noitemerr
-       {\@latex@warning{Empty `publications' environment}}%
-      \endlist}
 
-\newenvironment{patents}[1]
-     {\chapter{\sjtu@label@patents}%
-      \@mkboth{\MakeUppercase\sjtu@label@patents}
-              {\MakeUppercase\sjtu@label@patents}%
-      \list{\@biblabel{\@arabic\c@enumiv}}%
-           {\settowidth\labelwidth{\@biblabel{#1}}%
-            \leftmargin\labelwidth
-            \advance\leftmargin\labelsep
-            \@openbib@code
-            \usecounter{enumiv}%
-            \let\p@enumiv\@empty
-            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
-      \sloppy
-      \clubpenalty4000
-      \@clubpenalty \clubpenalty
-      \widowpenalty4000%
-      \sfcode`\.\@m}
-     {\def\@noitemerr
-       {\@latex@warning{Empty `patents' environment}}%
-      \endlist}
 
-\newenvironment{projects}[1]
-     {\chapter{\sjtu@label@projects}%
-      \@mkboth{\MakeUppercase\sjtu@label@projects}
-              {\MakeUppercase\sjtu@label@projects}%
-      \list{\@biblabel{\@arabic\c@enumiv}}%
-           {\settowidth\labelwidth{\@biblabel{#1}}%
-            \leftmargin\labelwidth
-            \advance\leftmargin\labelsep
-            \@openbib@code
-            \usecounter{enumiv}%
-            \let\p@enumiv\@empty
-            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
-      \sloppy
-      \clubpenalty4000
-      \@clubpenalty \clubpenalty
-      \widowpenalty4000%
-      \sfcode`\.\@m}
-     {\def\@noitemerr
-       {\@latex@warning{Empty `projects' environment}}%
-      \endlist}
 
-\newenvironment{resume}
-  {\chapter{\sjtu@label@resume}}
+
+ 
+\renewenvironment{thanks}
+  {\chapter{\sjtu@label@thanks}}
   {}
   
-\newenvironment{resumesection}[1]
-  {{\noindent\normalfont\bfseries #1}
-   \list{}{\labelwidth\z@
-           \leftmargin 2\ccwd}
-   \item\relax}
-   {\endlist}
-   
-\newenvironment{resumelist}[1]
-  {{\noindent\normalfont\bfseries #1}
-   \list{}{\labelwidth\z@
-           \leftmargin 4\ccwd
-           \itemindent -2\ccwd
-           \listparindent\itemindent}
-   \item\relax}
-   {\endlist}
-   
-\renewenvironment{thanks}
-  {\chapter{\sjtu@label@thanks}\label{last}}
-  {}
+\newenvironment{finish}{}{\label{last}}
 
 \newenvironment{summary}
 {\chapter*{\sjtu@label@summary\markboth{\sjtu@label@summary}{}}\addcontentsline{toc}{chapter}{\sjtu@label@summary}
-}{}
+}{\label{last}}
 
 \newenvironment{symbolnote}{\chapter{\sjtu@label@symbolnote}
 }{}
@@ -716,3 +607,6 @@
 
 %%
 %% End of file `sjtuthesis.cls'.
+
+
+\endinput
