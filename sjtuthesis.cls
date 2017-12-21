@@ -372,8 +372,7 @@
 {
 \def\@one@name{#1}
 \def\@one@num{#2}
-\def\one@flagtrue{}
-}
+\one@flagtrue}
 
 \NewDocumentCommand \multiauthortwo{gg}
 {
