@@ -368,6 +368,7 @@
 \newif\ifseven@flag\seven@flagfalse
 \newif\ifeight@flag\eight@flagfalse
 \newif\ifnine@flag\nine@flagfalse
+
 \NewDocumentCommand \multiauthorone{gg}
 {
 \def\@one@name{#1}
@@ -431,6 +432,7 @@
 
 \newcommand\parse
 {
+%~\\
 \ifone@flag
 \foo{\@one@name}{\@one@num}
 \fi
@@ -458,6 +460,8 @@
 \ifnine@flag
 \foo{\@nine@name}{\@nine@num}
 \fi
+% ~\\
+ 指导教师：	& \underline{\makebox[180pt]{\sjtu@value@advisor}}\\
 }
 
 
