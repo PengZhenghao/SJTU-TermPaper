@@ -498,7 +498,7 @@
 \else %单作者
     \begin{tabular}{r@{：}l}
 
-        \begin{CJKfilltwosides}{4em}\sjtu@label@author\end{CJKfilltwosides}	& \underline{\makebox[180pt]{dsfdsfsdf\sjtu@value@author}} \\
+        \begin{CJKfilltwosides}{4em}\sjtu@label@author\end{CJKfilltwosides}	& \underline{\makebox[180pt]{\sjtu@value@author}} \\
         \begin{CJKfilltwosides}{4em}\sjtu@label@studentnumber\end{CJKfilltwosides} & \underline{\makebox[180pt]{\sjtu@value@studentnumber}} \\
 
       \begin{CJKfilltwosides}{4em}\sjtu@label@major\end{CJKfilltwosides} 	 & \underline{\makebox[180pt]{\sjtu@value@major}} \\
